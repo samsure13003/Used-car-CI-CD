@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resale Value Estimator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EEEBE2;
+    --panel: #FBFAF6;
+    --panel-2: #F2EFE5;
+    --ink: #1C1B17;
+    --muted: #726F63;
+    --accent: #D9761C;
+    --accent-deep: #B85F10;
+    --racing: #23524A;
+    --racing-soft: rgba(35,82,74,0.10);
+    --line: rgba(28,27,23,0.14);
+    --line-strong: rgba(28,27,23,0.28);
+    --shadow: 0 30px 70px -35px rgba(28,27,23,0.45);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  body{
+    background-image:
+      repeating-linear-gradient(0deg, rgba(28,27,23,0.025) 0px, rgba(28,27,23,0.025) 1px, transparent 1px, transparent 42px),
+      repeating-linear-gradient(90deg, rgba(28,27,23,0.025) 0px, rgba(28,27,23,0.025) 1px, transparent 1px, transparent 42px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 48px 24px;
+  }
+
+  .stage{
+    width:100%;
+    max-width: 1140px;
+    display:grid;
+    grid-template-columns: 0.82fr 1.18fr;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+  }
+
+  /* ---------------- Left: showroom panel ---------------- */
+  .intro{
+    padding: 52px 42px;
+    border-right: 1px solid var(--line);
+    background: linear-gradient(175deg, var(--panel-2), var(--panel) 55%);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+
+  .brand{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight:600;
+    color: var(--muted);
+    display:flex;
+    align-items:center;
+    gap:9px;
+    letter-spacing: 0.01em;
+  }
+
+  .brand-mark{
+    width:20px; height:20px;
+    border-radius:4px;
+    background: var(--accent);
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::after{
+    content:"";
+    position:absolute; inset:5px;
+    border: 2px solid var(--ink);
+    border-radius:2px;
+  }
+
+  .intro h1{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size: 46px;
+    line-height:0.98;
+    letter-spacing: -0.01em;
+    margin: 34px 0 14px;
+    max-width: 340px;
+  }
+
+  .intro p.lede{
+    color: var(--muted);
+    font-size:14.5px;
+    line-height:1.65;
+    max-width: 320px;
+    margin: 0;
+  }
+
+  /* gauge */
+  .gauge-wrap{
+    margin: 36px 0 8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .gauge-wrap svg{ width:100%; max-width: 260px; height:auto; }
+  .gauge-caption{
+    text-align:center;
+    margin-top: 6px;
+  }
+  .gauge-caption .num{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size: 26px;
+    color: var(--racing);
+    display:block;
+  }
+  .gauge-caption .cap{
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stat-strip{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line);
+    margin-top: 30px;
+    padding-top: 20px;
+  }
+  .stat-strip .stat{
+    padding-right: 10px;
+  }
+  .stat-strip .stat + .stat{
+    border-left: 1px solid var(--line);
+    padding-left: 14px;
+  }
+  .stat-strip .stat b{
+    display:block;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-size: 21px;
+    font-weight:700;
+  }
+  .stat-strip .stat span{
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height:1.3;
+    display:block;
+    margin-top:2px;
+  }
+
+  /* ---------------- Right: console panel ---------------- */
+  .console{
+    padding: 50px 48px 46px;
+  }
+
+  .console-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+    flex-wrap:wrap;
+  }
+
+  .console-head h2{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-size: 25px;
+    font-weight:700;
+    margin: 0 0 4px;
+  }
+  .console-head p{
+    color: var(--muted);
+    font-size: 13.5px;
+    margin:0;
+  }
+
+  .plate{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11.5px;
+    font-weight:600;
+    letter-spacing: 0.06em;
+    padding: 6px 12px 6px 10px;
+    border-radius: 3px;
+    position:relative;
+    white-space:nowrap;
+  }
+  .plate::before, .plate::after{
+    content:"";
+    width:4px; height:4px;
+    border-radius:50%;
+    background: var(--paper);
+    opacity:0.55;
+  }
+
+  fieldset{
+    border:none;
+    margin:0 0 26px;
+    padding:0;
+  }
+  fieldset:last-of-type{ margin-bottom: 0; }
+
+  .section-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 16px;
+    margin-top: 16px;
+  }
+  .field.full{ grid-column: 1 / -1; }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+
+  .field label{
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight:500;
+  }
+
+  select, input[type="number"]{
+    appearance:none;
+    -webkit-appearance:none;
+    width:100%;
+    background: var(--panel);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    padding: 11px 14px;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  select{
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0L5 6L10 0Z' fill='%23726F63'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+  }
+
+  select:focus, input[type="number"]:focus{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(217,118,28,0.16);
+  }
+
+  select option{ background: var(--panel); color: var(--ink); }
+  ::placeholder{ color: #A6A398; }
+
+  .unit-input{ position:relative; }
+  .unit-input input{ padding-right: 52px; }
+  .unit-input span{
+    position:absolute;
+    right: 12px; top:50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--muted);
+    pointer-events:none;
+  }
+
+  .submit-row{ margin-top: 6px; }
+
+  button.predict{
+    width:100%;
+    border:none;
+    cursor:pointer;
+    padding: 15px 20px;
+    border-radius: 5px;
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:700;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    color: var(--paper);
+    background: var(--ink);
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  button.predict:hover{ background: var(--accent-deep); transform: translateY(-1px); }
+  button.predict:focus-visible,
+  select:focus-visible,
+  input:focus-visible{
+    outline: 2px solid var(--racing);
+    outline-offset: 2px;
+  }
+
+  .result{
+    margin-top: 22px;
+    padding: 22px 24px;
+    border-radius: 6px;
+    background: var(--racing);
+    color: var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 16px;
+    flex-wrap:wrap;
+  }
+  .result .result-label{
+    font-size: 12.5px;
+    color: rgba(238,235,226,0.7);
+    text-transform: none;
+  }
+  .result .result-value{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-size: 34px;
+    font-weight:800;
+    color: #FFFFFF;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 900px){
+    .stage{ grid-template-columns: 1fr; }
+    .intro{ border-right:none; border-bottom: 1px solid var(--line); padding: 40px 32px; }
+    .console{ padding: 40px 32px; }
+    .intro h1{ font-size: 38px; max-width:none; }
+  }
+
+  @media (max-width: 560px){
+    .section-row{ grid-template-columns: 1fr; }
+    .stat-strip{ grid-template-columns: 1fr; row-gap: 14px; }
+    .stat-strip .stat + .stat{ border-left:none; padding-left:0; border-top:1px solid var(--line); padding-top:14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+
+    <!-- Showroom / narrative panel -->
+    <div class="intro">
+      <div>
+        <div class="brand"><span class="brand-mark"></span>Resale Value Desk</div>
+        <h1>What's this car worth today?</h1>
+        <p class="lede">Enter the specs from the logbook and we'll estimate a fair resale price, learned from thousands of completed used-car sales.</p>
+      </div>
+
+      <div>
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 220 140" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="var(--line-strong)" stroke-width="10" stroke-linecap="round"/>
+            <path d="M 20 120 A 90 90 0 0 1 200 120" fill="none" stroke="var(--racing)" stroke-width="10" stroke-linecap="round" stroke-dasharray="220 400" opacity="0.85"/>
+            <g stroke="var(--muted)" stroke-width="2">
+              <line x1="20" y1="120" x2="30" y2="110"/>
+              <line x1="45" y1="58" x2="53" y2="65"/>
+              <line x1="110" y1="30" x2="110" y2="40"/>
+              <line x1="175" y1="58" x2="167" y2="65"/>
+              <line x1="200" y1="120" x2="190" y2="110"/>
+            </g>
+            <g transform="rotate(-35 110 120)">
+              <line x1="110" y1="120" x2="110" y2="42" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+            </g>
+            <circle cx="110" cy="120" r="8" fill="var(--ink)"/>
+          </svg>
+          <div class="gauge-caption">
+            <span class="num">₹7.75L</span>
+            <span class="cap">average listing in this dataset</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat">
+          <b>15,411</b>
+          <span>past sales on record</span>
+        </div>
+        <div class="stat">
+          <b>120</b>
+          <span>models covered</span>
+        </div>
+        <div class="stat">
+          <b>₹40K–3.95Cr</b>
+          <span>observed price range</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spec-sheet / form panel -->
+    <div class="console">
+      <div class="console-head">
+        <div>
+          <h2>Vehicle spec sheet</h2>
+          <p>Fill in every field for the most accurate estimate.</p>
+        </div>
+        <span class="plate">10 fields</span>
+      </div>
+
+      <form action="{{ url_for('predict') }}" method="post">
+
+        <fieldset>
+          <span class="plate">Vehicle</span>
+          <div class="section-row">
+            <div class="field full">
+              <label for="model">Model</label>
+              <select class="form-control" id="model" name="model" required>
+                <option class="placeholder" selected disabled value="">Select the model</option>
+                <optgroup label="Audi">
+                  <option value="A4">A4</option>
+                  <option value="A6">A6</option>
+                  <option value="A8">A8</option>
+                  <option value="Q7">Q7</option>
+                </optgroup>
+                <optgroup label="BMW">
+                  <option value="3">3 Series</option>
+                  <option value="5">5 Series</option>
+                  <option value="6">6 Series</option>
+                  <option value="7">7 Series</option>
+                  <option value="X1">X1</option>
+                  <option value="X3">X3</option>
+                  <option value="X4">X4</option>
+                  <option value="X5">X5</option>
+                  <option value="Z4">Z4</option>
+                </optgroup>
+                <optgroup label="Bentley">
+                  <option value="Continental">Continental</option>
+                </optgroup>
+                <optgroup label="Datsun">
+                  <option value="GO">GO</option>
+                  <option value="RediGO">RediGO</option>
+                  <option value="redi-GO">redi-GO</option>
+                </optgroup>
+                <optgroup label="Ferrari">
+                  <option value="GTC4Lusso">GTC4Lusso</option>
+                </optgroup>
+                <optgroup label="Force">
+                  <option value="Gurkha">Gurkha</option>
+                </optgroup>
+                <optgroup label="Ford">
+                  <option value="Aspire">Aspire</option>
+                  <option value="Ecosport">Ecosport</option>
+                  <option value="Endeavour">Endeavour</option>
+                  <option value="Figo">Figo</option>
+                  <option value="Freestyle">Freestyle</option>
+                </optgroup>
+                <optgroup label="Honda">
+                  <option value="Amaze">Amaze</option>
+                  <option value="CR">CR</option>
+                  <option value="CR-V">CR-V</option>
+                  <option value="City">City</option>
+                  <option value="Civic">Civic</option>
+                  <option value="Jazz">Jazz</option>
+                  <option value="WR-V">WR-V</option>
+                </optgroup>
+                <optgroup label="Hyundai">
+                  <option value="Aura">Aura</option>
+                  <option value="Creta">Creta</option>
+                  <option value="Elantra">Elantra</option>
+                  <option value="Grand">Grand</option>
+                  <option value="Santro">Santro</option>
+                  <option value="Tucson">Tucson</option>
+                  <option value="Venue">Venue</option>
+                  <option value="Verna">Verna</option>
+                  <option value="i10">i10</option>
+                  <option value="i20">i20</option>
+                </optgroup>
+                <optgroup label="ISUZU">
+                  <option value="MUX">MUX</option>
+                </optgroup>
+                <optgroup label="Isuzu">
+                  <option value="D-Max">D-Max</option>
+                </optgroup>
+                <optgroup label="Jaguar">
+                  <option value="F-PACE">F-PACE</option>
+                  <option value="XE">XE</option>
+                  <option value="XF">XF</option>
+                </optgroup>
+                <optgroup label="Jeep">
+                  <option value="Compass">Compass</option>
+                  <option value="Wrangler">Wrangler</option>
+                </optgroup>
+                <optgroup label="Kia">
+                  <option value="Carnival">Carnival</option>
+                  <option value="Seltos">Seltos</option>
+                </optgroup>
+                <optgroup label="Land Rover">
+                  <option value="Rover">Rover</option>
+                </optgroup>
+                <optgroup label="Lexus">
+                  <option value="ES">ES</option>
+                  <option value="NX">NX</option>
+                  <option value="RX">RX</option>
+                </optgroup>
+                <optgroup label="MG">
+                  <option value="Hector">Hector</option>
+                </optgroup>
+                <optgroup label="Mahindra">
+                  <option value="Alturas">Alturas</option>
+                  <option value="Bolero">Bolero</option>
+                  <option value="KUV">KUV</option>
+                  <option value="KUV100">KUV100</option>
+                  <option value="Marazzo">Marazzo</option>
+                  <option value="Scorpio">Scorpio</option>
+                  <option value="Thar">Thar</option>
+                  <option value="XUV300">XUV300</option>
+                  <option value="XUV500">XUV500</option>
+                </optgroup>
+                <optgroup label="Maruti">
+                  <option value="Alto">Alto</option>
+                  <option value="Baleno">Baleno</option>
+                  <option value="Celerio">Celerio</option>
+                  <option value="Ciaz">Ciaz</option>
+                  <option value="Dzire LXI">Dzire LXI</option>
+                  <option value="Dzire VXI">Dzire VXI</option>
+                  <option value="Dzire ZXI">Dzire ZXI</option>
+                  <option value="Eeco">Eeco</option>
+                  <option value="Ertiga">Ertiga</option>
+                  <option value="Ignis">Ignis</option>
+                  <option value="S-Presso">S-Presso</option>
+                  <option value="Swift">Swift</option>
+                  <option value="Swift Dzire">Swift Dzire</option>
+                  <option value="Vitara">Vitara</option>
+                  <option value="Wagon R">Wagon R</option>
+                  <option value="XL6">XL6</option>
+                </optgroup>
+                <optgroup label="Maserati">
+                  <option value="Ghibli">Ghibli</option>
+                  <option value="Quattroporte">Quattroporte</option>
+                </optgroup>
+                <optgroup label="Mercedes-AMG">
+                  <option value="C">C</option>
+                </optgroup>
+                <optgroup label="Mercedes-Benz">
+                  <option value="C-Class">C-Class</option>
+                  <option value="CLS">CLS</option>
+                  <option value="E-Class">E-Class</option>
+                  <option value="GL-Class">GL-Class</option>
+                  <option value="GLS">GLS</option>
+                  <option value="S-Class">S-Class</option>
+                </optgroup>
+                <optgroup label="Mini">
+                  <option value="Cooper">Cooper</option>
+                </optgroup>
+                <optgroup label="Nissan">
+                  <option value="Kicks">Kicks</option>
+                  <option value="X-Trail">X-Trail</option>
+                </optgroup>
+                <optgroup label="Porsche">
+                  <option value="Cayenne">Cayenne</option>
+                  <option value="Macan">Macan</option>
+                  <option value="Panamera">Panamera</option>
+                </optgroup>
+                <optgroup label="Renault">
+                  <option value="Duster">Duster</option>
+                  <option value="KWID">KWID</option>
+                  <option value="Triber">Triber</option>
+                </optgroup>
+                <optgroup label="Rolls-Royce">
+                  <option value="Ghost">Ghost</option>
+                </optgroup>
+                <optgroup label="Skoda">
+                  <option value="Octavia">Octavia</option>
+                  <option value="Rapid">Rapid</option>
+                  <option value="Superb">Superb</option>
+                </optgroup>
+                <optgroup label="Tata">
+                  <option value="Altroz">Altroz</option>
+                  <option value="Harrier">Harrier</option>
+                  <option value="Hexa">Hexa</option>
+                  <option value="Nexon">Nexon</option>
+                  <option value="Safari">Safari</option>
+                  <option value="Tiago">Tiago</option>
+                  <option value="Tigor">Tigor</option>
+                </optgroup>
+                <optgroup label="Toyota">
+                  <option value="Camry">Camry</option>
+                  <option value="Fortuner">Fortuner</option>
+                  <option value="Glanza">Glanza</option>
+                  <option value="Innova">Innova</option>
+                  <option value="Yaris">Yaris</option>
+                </optgroup>
+                <optgroup label="Volkswagen">
+                  <option value="Polo">Polo</option>
+                  <option value="Vento">Vento</option>
+                </optgroup>
+                <optgroup label="Volvo">
+                  <option value="S90">S90</option>
+                  <option value="XC">XC</option>
+                  <option value="XC60">XC60</option>
+                  <option value="XC90">XC90</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fuel_type">Fuel type</label>
+              <select class="form-control" id="fuel_type" name="fuel_type" required>
+                <option class="placeholder" selected disabled value="">Select fuel type</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="CNG">CNG</option>
+                <option value="LPG">LPG</option>
+                <option value="Electric">Electric</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="transmission_type">Transmission</label>
+              <select class="form-control" id="transmission_type" name="transmission_type" required>
+                <option class="placeholder" selected disabled value="">Select transmission</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="seats">Seats</label>
+              <select class="form-control" id="seats" name="seats" required>
+                <option class="placeholder" selected disabled value="">Select seat count</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="seller_type">Seller type</label>
+              <select class="form-control" id="seller_type" name="seller_type" required>
+                <option class="placeholder" selected disabled value="">Select seller type</option>
+                <option value="Individual">Individual</option>
+                <option value="Dealer">Dealer</option>
+                <option value="Trustmark Dealer">Trustmark dealer</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <span class="plate">Usage &amp; condition</span>
+          <div class="section-row">
+            <div class="field">
+              <label for="vehicle_age">Vehicle age</label>
+              <div class="unit-input">
+                <input class="form-control" type="number" id="vehicle_age" name="vehicle_age"
+                       placeholder="e.g. 5" min="0" max="30" required />
+                <span>years</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="km_driven">Odometer reading</label>
+              <div class="unit-input">
+                <input class="form-control" type="number" id="km_driven" name="km_driven"
+                       placeholder="e.g. 45000" min="0" required />
+                <span>km</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <span class="plate">Performance</span>
+          <div class="section-row">
+            <div class="field">
+              <label for="mileage">Mileage</label>
+              <div class="unit-input">
+                <input class="form-control" type="number" id="mileage" name="mileage" step="0.1"
+                       placeholder="e.g. 18.9" min="0" max="40" required />
+                <span>km/l</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="engine">Engine displacement</label>
+              <div class="unit-input">
+                <input class="form-control" type="number" id="engine" name="engine"
+                       placeholder="e.g. 1197" min="0" required />
+                <span>cc</span>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label for="max_power">Max power</label>
+              <div class="unit-input">
+                <input class="form-control" type="number" id="max_power" name="max_power" step="0.1"
+                       placeholder="e.g. 82" min="0" required />
+                <span>bhp</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="submit-row">
+          <button class="predict" type="submit">Estimate resale value</button>
+        </div>
+
+        {% if results %}
+        <div class="result">
+          <span class="result-label">Estimated resale value</span>
+          <span class="result-value">₹ {{ results }}</span>
+        </div>
+        {% endif %}
+
+      </form>
+    </div>
+
+  </div>
+
+</body>
+</html>
