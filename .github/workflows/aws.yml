@@ -82,7 +82,13 @@ jobs:
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v1
 
+        - name: Free up disk space before pull
+          run: |
+            docker system prune -af --volumes
+            df -h
+
         - name: Pull latest image
+          timeout-minutes: 5
           env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
