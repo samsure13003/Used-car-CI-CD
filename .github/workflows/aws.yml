@@ -21,9 +21,6 @@ jobs:
       - name: Run unit tests
         run: echo "Running unit tests"
 
-      - name: Check disk space before build
-        run: df -h
-
   build-and-push-ecr-image:
     name: Continuous Delivery
     needs: integration
@@ -61,8 +58,8 @@ jobs:
           sudo rm -rf /usr/share/dotnet
 
           # Build and push
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . || { echo "Docker build failed"; exit 1; }
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG || { echo "Docker push failed"; exit 1; }
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
   Continuous-Deployment:
